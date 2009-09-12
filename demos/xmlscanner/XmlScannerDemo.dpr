@@ -2,8 +2,7 @@ program XmlScannerDemo;
 
 uses
   Forms,
-  Main in 'Main.pas' {FrmMain},
-  LibXmlComps in '..\..\P\LibXmlComps.pas';
+  Main in 'Main.pas' {FrmMain};
 
 {$R *.RES}
 

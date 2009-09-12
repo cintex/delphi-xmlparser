@@ -188,6 +188,7 @@ Date        Author Version Changes
                            There is a new symbol HAS_CONTNRS_UNIT which is used now to
                            distinguish between IDEs which come with the Contnrs unit and
                            those that don't.
+2009-09-03 DremLIN 1.0.18  Included an IFDEF for Delphi 2006,2009,2010 (VER180,VER200,VER210 )
 *)
 
 
@@ -209,11 +210,22 @@ Date        Author Version Changes
                  (*$DEFINE D5_OR_NEWER *)
                  (*$IFNDEF VER130 *)
                    (*$IFNDEF VER140 *)
-                     (*$IFNDEF VER150 *)
-                       If the compiler gets stuck here,
-                       you are using a compiler version unknown to this code.
-                       You will probably have to change this code accordingly.
-                       At first, try to comment out these lines and see what will happen.
+                     (*$IFNDEF VER150 *)     
+        // #2009-09-03. Start of block. DremLIN                     
+                       (*$IFNDEF VER180 *) // Delphi 2006 Support
+                         (*$DEFINE D10_OR_NEWER *)
+                           (*$IFNDEF VER200 *)     // Delphi 2009 Support
+                             (*$DEFINE D12_OR_NEWER *) 
+                             (*$IFNDEF VER210 *)       // Delphi 2010 Support
+                               (*$DEFINE D14_OR_NEWER *) 
+                                 If the compiler gets stuck here,
+                                 you are using a compiler version unknown to this code.
+                                 You will probably have to change this code accordingly.
+                                 At first, try to comment out these lines and see what will happen.
+                             (*$ENDIF *)
+                           (*$ENDIF *)
+                       (*$ENDIF *)
+        // #2009-09-03. End of block. DremLIN                       
                      (*$ENDIF *)
                    (*$ENDIF *)
                  (*$ENDIF *)
@@ -244,7 +256,8 @@ USES
   Math;
 
 CONST
-  CVersion = '1.0.17';  // This variable will be updated for every release
+  CVersion = '1.0.18';  // #2009-09-03 DremLIN. Number of version change. 
+                        // This variable will be updated for every release
                         // (I hope, I won't forget to do it everytime ...)
 
 TYPE
@@ -725,7 +738,11 @@ VAR
   I, K      : INTEGER;
   A         : BYTE;     // Current ANSI character value
   U         : WORD;
+  {$IFDEF UNICODE} // #2009-09-03 DremLIN
+  Ch        : WIDECHAR;     // Dest char
+  {$ELSE}
   Ch        : CHAR;     // Dest char
+  {$ENDIF}
   Len       : INTEGER;  // Current real length of "Result" string
 BEGIN
   SourceLen := Length (Source);
@@ -736,7 +753,11 @@ BEGIN
     A := ORD (Source [I]);
     IF A < $80 THEN BEGIN                                               // Range $0000..$007F
       INC (Len);
+      {$IFDEF UNICODE} // #2009-09-03 DremLIN
+      Result [Len] := AnsiChar(Source[I]);
+      {$ELSE}
       Result [Len] := Source [I];
+      {$ENDIF}
       INC (I);
       END
     ELSE BEGIN                                                          // Determine U, Inc I
@@ -766,7 +787,11 @@ BEGIN
           BREAK;
           END;
       INC (Len);
+      {$IFDEF UNICODE} // #2009-09-03 DremLIN
+      Result [Len] := AnsiChar(Ch);
+      {$ELSE}
       Result [Len] := Ch;
+      {$ENDIF}
       END;
     END;
   SetLength (Result, Len);
@@ -1115,6 +1140,12 @@ VAR
   f           : FILE;
   ReadIn      : INTEGER;
   OldFileMode : INTEGER;
+  {$IFDEF UNICODE} // #2009-09-03 DremLIN
+  ABuffer: PAnsiChar;
+  ABufferSize: Integer;
+  AStr: AnsiString;
+  UStr: string;
+  {$ENDIF}
 BEGIN
   Result := FALSE;
   Clear;
@@ -1133,8 +1164,13 @@ BEGIN
     TRY
       // --- Allocate Memory
       TRY
+        {$IFDEF UNICODE} // #2009-09-03 DremLIN
+        ABufferSize := Filesize (f) + 1;
+        GetMem (ABuffer, ABufferSize);
+        {$ELSE}
         FBufferSize := Filesize (f) + 1;
         GetMem (FBuffer, FBufferSize);
+        {$ENDIF}
       EXCEPT
         Clear;
         EXIT;
@@ -1142,8 +1178,16 @@ BEGIN
 
       // --- Read File
       TRY
+        {$IFDEF UNICODE} // #2009-09-03 DremLIN
+        BlockRead (f, ABuffer^, ABufferSize, ReadIn);
+        (ABuffer+ReadIn)^ := #0;
+        AStr := ABuffer;
+        UStr := AStr;
+        Self.LoadFromBuffer(PChar(UStr));
+        {$ELSE}
         BlockRead (f, FBuffer^, FBufferSize, ReadIn);
         (FBuffer+ReadIn)^ := #0;  // NULL termination
+        {$ENDIF}
       EXCEPT
         Clear;
         EXIT;
