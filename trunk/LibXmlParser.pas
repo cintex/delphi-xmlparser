@@ -1174,6 +1174,12 @@ VAR
   f           : FILE;
   ReadIn      : INTEGER;
   OldFileMode : INTEGER;
+  {$IFDEF UNICODE} // #2009-09-17 DremLIN
+  ABuffer: PAnsiChar;
+  ABufferSize: Integer;
+  AStr: AnsiString;
+  UStr: string;
+  {$ENDIF}
 BEGIN
   Result := FALSE;
   Clear;
@@ -1192,8 +1198,13 @@ BEGIN
     TRY
       // --- Allocate Memory
       TRY
+        {$IFDEF UNICODE} // #2009-09-17 DremLIN
+        ABufferSize := Filesize (f) + 1;
+        GetMem (ABuffer, ABufferSize);
+        {$ELSE}
         FBufferSize := Filesize (f) + 1;
         GetMem (FBuffer, FBufferSize);
+        {$ENDIF}
       EXCEPT
         Clear;
         EXIT;
@@ -1201,8 +1212,16 @@ BEGIN
 
       // --- Read File
       TRY
+        {$IFDEF UNICODE} // #2009-09-17 DremLIN
+        BlockRead (f, ABuffer^, ABufferSize, ReadIn);
+        (ABuffer+ReadIn)^ := #0;
+        AStr := ABuffer;
+        UStr := AStr;
+        Self.LoadFromBuffer(PChar(UStr));
+        {$ELSE}
         BlockRead (f, FBuffer^, FBufferSize, ReadIn);
         (FBuffer+ReadIn)^ := #0;  // NULL termination
+        {$ENDIF}
       EXCEPT
         Clear;
         EXIT;
