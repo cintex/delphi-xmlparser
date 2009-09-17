@@ -188,7 +188,7 @@ Date        Author Version Changes
                            There is a new symbol HAS_CONTNRS_UNIT which is used now to
                            distinguish between IDEs which come with the Contnrs unit and
                            those that don't.
-2009-09-03 DremLIN 1.0.18  Included an IFDEF for Delphi 2006,2009,2010 (VER180,VER200,VER210 )
+2009-09-03 DremLIN 1.1.0   Included an IFDEF for Delphi 2006,2009,2010 (VER180,VER200,VER210 )
 *)
 
 
@@ -256,7 +256,7 @@ USES
   Math;
 
 CONST
-  CVersion = '1.0.18';  // #2009-09-03 DremLIN. Number of version change. 
+  CVersion = '1.1.0';  // #2009-09-03 DremLIN. Number of version change. 
                         // This variable will be updated for every release
                         // (I hope, I won't forget to do it everytime ...)
 
