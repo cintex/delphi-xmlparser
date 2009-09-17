@@ -203,7 +203,7 @@ Date        Author Version Changes
                            translate character references.
                            TXmlScanner: Added a new event OnTranslateCharacter to
                            translate character references.
-2009-09-17 DremLIN 1.1.1b  Included an IFDEF for Delphi 2006,2009,2010 (VER180,VER200,VER210)
+2009-09-17 DremLIN 1.1.1   Included an IFDEF for Delphi 2006,2009,2010 (VER180,VER200,VER210)
 *)
 
 
@@ -259,9 +259,9 @@ USES
   Math;
 
 CONST
-  CVersion = '1.1.1 BETA';  // #DremLIN 2009-09-17. Number of version change.
-                            // This variable will be updated for every release
-                            // (I hope, I won't forget to do it everytime ...)
+  CVersion = '1.1.1';  // #DremLIN 2009-09-17. Number of version change.
+                       // This variable will be updated for every release
+                       // (I hope, I won't forget to do it everytime ...)
 
 TYPE
   TPartType    = // --- Document Part Types
@@ -742,7 +742,11 @@ VAR
   I, K      : INTEGER;
   A         : BYTE;     // Current ANSI character value
   U         : WORD;
+  {$IFDEF UNICODE} // #2009-09-17 DremLIN
+  Ch        : WIDECHAR; // Dest char
+  {$ELSE}
   Ch        : CHAR;     // Dest char
+  {$ENDIF}
   Len       : INTEGER;  // Current real length of "Result" string
 BEGIN
   SourceLen := Length (Source);
@@ -753,7 +757,11 @@ BEGIN
     A := ORD (Source [I]);
     IF A < $80 THEN BEGIN                                               // Range $0000..$007F
       INC (Len);
+      {$IFDEF UNICODE} // #2009-09-17 DremLIN
+      Result [Len] := AnsiChar(Source[I]);
+      {$ELSE}
       Result [Len] := Source [I];
+      {$ENDIF}
       INC (I);
       END
     ELSE BEGIN                                                          // Determine U, Inc I
@@ -783,7 +791,11 @@ BEGIN
           BREAK;
           END;
       INC (Len);
+      {$IFDEF UNICODE} // #2009-09-17 DremLIN
+      Result [Len] := AnsiChar(Ch);
+      {$ELSE}
       Result [Len] := Ch;
+      {$ENDIF}
       END;
     END;
   SetLength (Result, Len);
